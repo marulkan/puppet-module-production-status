@@ -6,10 +6,10 @@
 
 class prodstatus (
   $allowed_states       = {
-    pre_prod => ['Installing', 'Poc', 'Sandbox'],
-    prod     => ['In Production', 'Move to Production'],
+    pre_prod => ['Installing', 'PoC', 'Sandbox'],
+    prod     => ['In Production'],
     decom    => ['Decomissioned'] },
-  $allowed_server_types = ['Infrastructure', 'EPG-SIM'],
+  $allowed_server_types = ['Infrastructure'],
   $state                = 'Installing',
   $type                 = 'Infrastructure',
 ) {
