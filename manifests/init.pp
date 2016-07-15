@@ -32,7 +32,7 @@ class prodstatus (
   if member($all_states, $state) {
     file { 'production-state':
       ensure  => file,
-      path    => '/etc/prodstatus/state',
+      path    => "${file_path}/state",
       owner   => 'root',
       group   => 'root',
       mode    => '0644',
@@ -53,7 +53,7 @@ class prodstatus (
   if member($allowed_server_types, $type) {
     file { 'production-type':
       ensure  => file,
-      path    => '/etc/prodstatus/type',
+      path    => "${file_path}/type",
       owner   => 'root',
       group   => 'root',
       mode    => '0644',
