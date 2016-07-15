@@ -12,12 +12,13 @@ class prodstatus (
   $allowed_server_types = ['Infrastructure'],
   $state                = 'Installing',
   $type                 = 'Infrastructure',
+  $file_path            = '/etc/prodstatus', # Changing this will break the facts.
 ) {
 
   # /etc/prodstatus should always be present
   file { 'prodstatus':
     ensure => directory,
-    path   => '/etc/prodstatus',
+    path   => $file_path,
     owner  => 'root',
     group  => 'root',
     mode   => '0644',
@@ -35,6 +36,7 @@ class prodstatus (
       owner   => 'root',
       group   => 'root',
       mode    => '0644',
+      content => $state,
       require => File['prodstatus'],
     }
 
@@ -55,6 +57,7 @@ class prodstatus (
       owner   => 'root',
       group   => 'root',
       mode    => '0644',
+      content => $type,
       require => File['prodstatus'],
     }
 
