@@ -1,5 +1,5 @@
 Facter.add('production_state') do
-  fcv = :facterversion.split('.')
+  fcv = Facter.value(:facterversion).split('.')
   if fcv[0] == '1'
     setcode do
       Facter::Util::Resolution.exec('cat /etc/prodstatus/state')
@@ -11,7 +11,7 @@ Facter.add('production_state') do
   end
 end
 Facter.add('production_type') do
-  fcv = :facterversion.split('.')
+  fcv = Facter.value(:facterversion).split('.')
   if fcv[0] == '1'
     setcode do
       Facter::Util::Resolution.exec('cat /etc/prodstatus/type')
