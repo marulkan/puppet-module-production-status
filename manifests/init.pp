@@ -78,11 +78,7 @@ class prodstatus (
      ensure => absent,
      path   => "${file_path}/state",
    }
-<<<<<<< HEAD
    file { 'production-type': 
-=======
-   file { 'production-type' {
->>>>>>> 5b1be005723905b4904af5040759b33372436c8d
      ensure => absent,
      path   => "${file_path}/type",
    }
