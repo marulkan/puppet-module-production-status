@@ -76,6 +76,10 @@ class prodstatus (
  elsif $ensure == 'absent' {
    file { 'production-state':
      ensure => absent,
+     path   => "${file_path}/state",
+   }
+   file { 'production-type': 
+     ensure => absent,
      path   => "${file_path}/type",
    }
    file_line { 'motd_type':
