@@ -5,6 +5,7 @@
 #
 
 class prodstatus (
+  $ensure = 'present',
   $allowed_states       = {
     pre_prod => ['Installing', 'PoC', 'Sandbox'],
     prod     => ['In Production'],
@@ -14,6 +15,7 @@ class prodstatus (
   $type                 = 'Infrastructure',
   $file_path            = '/etc/prodstatus', # Changing this will break the facts.
 ) {
+  if $ensure == 'present' {
 
   # /etc/prodstatus should always be present
   file { 'prodstatus':
@@ -70,4 +72,18 @@ class prodstatus (
   else {
     notify { "${type} is not a valid type!": }
   }
+ }
+ elsif $ensure == 'absent' {
+   file { 'production-state':
+     ensure => absent,
+     path   => "${file_path}/type",
+   }
+   file_line { 'motd_type':
+     ensure            => absent,
+     path              => '/etc/motd',
+     match             => '^Production type:',
+     match_for_absence => true,
+     multiple          => true,
+  }
+ }
 }
