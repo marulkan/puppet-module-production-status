@@ -14,6 +14,8 @@ class prodstatus (
   $state                = 'Installing',
   $type                 = 'Infrastructure',
   $file_path            = '/etc/prodstatus', # Changing this will break the facts.
+  $type_extra           = undef,
+  $fact_location        = '/etc/facter/facts.d', # Default in puppet, other modules handle this path.
 ) {
   if $ensure == 'present' {
 
@@ -68,6 +70,17 @@ class prodstatus (
       match => '^Production type:',
       line  => "Production type: ${type}",
     }
+
+    if $type_extra {
+      file { 'second-type-fact':
+        ensure  => file,
+        path    => "${fact_location}/${type_extra}.txt",
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
+        content => "${type_extra}=${type}",
+      }
+    }
   }
   else {
     notify { "${type} is not a valid type!": }
@@ -78,7 +91,7 @@ class prodstatus (
      ensure => absent,
      path   => "${file_path}/state",
    }
-   file { 'production-type': 
+   file { 'production-type':
      ensure => absent,
      path   => "${file_path}/type",
    }
@@ -89,5 +102,9 @@ class prodstatus (
      match_for_absence => true,
      multiple          => true,
   }
+   file { 'second-type-fact':
+     ensure => absent,
+     path   => "${fact_location}/${type_extra}.txt",
+   }
  }
 }
