@@ -38,3 +38,23 @@ Facter.add('production_type') do
     end
   end
 end
+Facter.add('production_cost') do
+  fcv = Facter.value(:facterversion).split('.')
+  if fcv[0] == '1'
+    setcode do
+      if File.exist? '/etc/prodstatus/cost'
+        Facter::Util::Resolution.exec('cat /etc/prodstatus/cost')
+      else
+        'NA'
+      end
+    end
+  else
+    setcode do
+      if File.exist? '/etc/prodstatus/cost'
+        Facter::Core::Execution.exec('cat /etc/prodstatus/cost')
+      else
+        'NA'
+      end
+    end
+  end
+end
