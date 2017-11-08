@@ -4,6 +4,12 @@ Classification of a server in what production status it is.
 
 # Parameters prodstatus
 
+allowed_cost
+--------------
+An array of allowed server cost locations. To force people to write accroding to a set standard
+
+- *Default*: ['Customer1']
+
 allowed_states
 --------------
 An array of allowed states for a server. To force people to write accroding to a set standard
@@ -18,6 +24,12 @@ allowed_server_types
 An array of allowed server types. To force people to write accroding to a set standard
 
 - *Default*: ['Infrastructure']
+
+cost
+-----
+The current cost location your server is in.
+
+- *Default*: 'Customer1'
 
 state
 -----
@@ -37,11 +49,11 @@ The location of the prodstatus files. Do not change this location since it will 
 
 - *Default*: '/etc/prodstatus'
 
-type_extra
+cost_extra
 --------------
-An extra way of definnig what the type fact should be called.
-This is only for handeling a specific case where i have to be able to 
-call this module something else then production_type.
+An extra way of definnig what the cost fact should be called.
+This is only for handeling a specific case where i have to be able to
+call this module something else then production_cost
 
 - *Default*: undef
 

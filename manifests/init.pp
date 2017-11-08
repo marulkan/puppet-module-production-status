@@ -6,15 +6,17 @@
 
 class prodstatus (
   $ensure = 'present',
+  $allowed_cost         = ['Customer1'],
   $allowed_states       = {
     pre_prod => ['Installing', 'PoC', 'Sandbox'],
     prod     => ['In Production'],
     decom    => ['Decomissioned'] },
   $allowed_server_types = ['Infrastructure'],
+  $cost                 = 'Customer1',
   $state                = 'Installing',
   $type                 = 'Infrastructure',
   $file_path            = '/etc/prodstatus', # Changing this will break the facts.
-  $type_extra           = undef,
+  $cost_extra           = undef,
   $fact_location        = '/etc/facter/facts.d', # Default in puppet, other modules handle this path.
 ) {
   if $ensure == 'present' {
@@ -70,20 +72,34 @@ class prodstatus (
       match => '^Production type:',
       line  => "Production type: ${type}",
     }
+  }
+  else {
+    notify { "${type} is not a valid type!": }
+  }
 
-    if $type_extra {
-      file { 'second-type-fact':
+  if member($allowed_cost, $cost) {
+    file { 'production-cost':
+      ensure  => file,
+      path    => "${file_path}/cost",
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      content => $cost,
+      require => File['prodstatus'],
+    }
+    if $cost_extra {
+      file { 'second-cost-fact':
         ensure  => file,
-        path    => "${fact_location}/${type_extra}.txt",
+        path    => "${fact_location}/${cost_extra}.txt",
         owner   => 'root',
         group   => 'root',
         mode    => '0644',
-        content => "${type_extra}=${type}",
+        content => "${cost_extra}=${cost}",
       }
     }
   }
   else {
-    notify { "${type} is not a valid type!": }
+    notify { "${cost} is not a valid cost!": }
   }
  }
  elsif $ensure == 'absent' {
@@ -95,6 +111,10 @@ class prodstatus (
      ensure => absent,
      path   => "${file_path}/type",
    }
+   file { 'production-cost':
+     ensure => absent,
+     path   => "${file_path}/cost",
+   }
    file_line { 'motd_type':
      ensure            => absent,
      path              => '/etc/motd',
@@ -102,9 +122,9 @@ class prodstatus (
      match_for_absence => true,
      multiple          => true,
   }
-   file { 'second-type-fact':
+   file { 'second-cost-fact':
      ensure => absent,
-     path   => "${fact_location}/${type_extra}.txt",
+     path   => "${fact_location}/${cost_extra}.txt",
    }
  }
 }
