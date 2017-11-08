@@ -12,6 +12,7 @@ class prodstatus (
     prod     => ['In Production'],
     decom    => ['Decomissioned'] },
   $allowed_server_types = ['Infrastructure'],
+  $motd                 = 'USE_DEFAULTS',
   $cost                 = 'Customer1',
   $state                = 'Installing',
   $type                 = 'Infrastructure',
@@ -20,6 +21,34 @@ class prodstatus (
   $fact_location        = '/etc/facter/facts.d', # Default in puppet, other modules handle this path.
 ) {
   if $ensure == 'present' {
+
+  case $::osfamily {
+    'Debian', 'Ubuntu': {
+      $default_motd = false
+    }
+    'Suse', 'RedHat', 'Solaris': {
+      $default_motd = true
+    }
+    default: {
+      fail("prodstatus supports osfamilies Ubuntu, Debian, RedHat, Solaris and Suse. Detected osfamily is <${::osfamily}>.")
+    }
+  }
+
+  if $motd == 'USE_DEFAULTS' {
+    $motd_real = $default_motd
+  } else {
+    $motd_real = $motd
+  }
+
+  if !$motd_real {
+    file { 'motd-ubuntu':
+      ensure => file,
+      path   => '/etc/update-motd.d/99-prodstatus',
+      owner  => 'root',
+      group  => 'root',
+      mode   => '0755',
+    }
+  }
 
   # /etc/prodstatus should always be present
   file { 'prodstatus':
@@ -32,10 +61,9 @@ class prodstatus (
 
   # General stuff that will be applied in all cases
   # except when we don't have an valid state.
-
   # Merge the hash for some validation.
   $all_states = flatten(values($allowed_states))
-  if member($all_states, $state) {
+  if member($all_states, $state) and $motd_real {
     file { 'production-state':
       ensure  => file,
       path    => "${file_path}/state",
@@ -52,11 +80,28 @@ class prodstatus (
       line  => "Production state: ${state}",
     }
   }
+  elsif member($all_states, $state) and !$motd_real {
+    file { 'production-state':
+      ensure  => file,
+      path    => "${file_path}/state",
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      content => $state,
+      require => File['prodstatus'],
+    }
+
+    file_line { 'motd_state':
+      path  => '/etc/update-motd.d/99-prodstatus',
+      match => "^echo \"Production state:\"",
+      line  => "echo \"Production state: ${state}\"",
+    }
+  }
   else {
     notify { "${state} is not a valid state!": }
   }
 
-  if member($allowed_server_types, $type) {
+  if member($allowed_server_types, $type) and $motd_real {
     file { 'production-type':
       ensure  => file,
       path    => "${file_path}/type",
@@ -71,6 +116,23 @@ class prodstatus (
       path  => '/etc/motd',
       match => '^Production type:',
       line  => "Production type: ${type}",
+    }
+  }
+  elsif member($allowed_server_types, $type) and !$motd_real {
+    file { 'production-type':
+      ensure  => file,
+      path    => "${file_path}/type",
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      content => $type,
+      require => File['prodstatus'],
+    }
+
+    file_line { 'motd_type':
+      path  => '/etc/update-motd.d/99-prodstatus',
+      match => "^echo \"Production type:\"",
+      line  => "echo \"Production type: ${type}\"",
     }
   }
   else {
