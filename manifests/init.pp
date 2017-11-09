@@ -48,6 +48,11 @@ class prodstatus (
       group  => 'root',
       mode   => '0755',
     }
+    file_line { 'motd_bash':
+      path  => '/etc/update-motd.d/99-prodstatus',
+      match => '^#!/bin/bash',
+      line  => '#!/bin/bash',
+    }
   }
 
   # /etc/prodstatus should always be present
@@ -95,6 +100,7 @@ class prodstatus (
       path  => '/etc/update-motd.d/99-prodstatus',
       match => "^echo \"Production state:\"",
       line  => "echo \"Production state: ${state}\"",
+      require => File_line['motd_bash']
     }
   }
   else {
@@ -133,6 +139,7 @@ class prodstatus (
       path  => '/etc/update-motd.d/99-prodstatus',
       match => "^echo \"Production type:\"",
       line  => "echo \"Production type: ${type}\"",
+      require => File_line['motd_bash']
     }
   }
   else {
